@@ -16,9 +16,13 @@ let yFruit = 0;
 let scoreBoard = document.getElementById('scoreBoard');
 let score = 0;
 
+let running = true;
+
+let frames = 20;
+
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
-  frameRate(35);
+  frameRate(frames);
   stroke(255);
   strokeWeight(20);
   updateFruitCoordinates();
@@ -26,18 +30,29 @@ function setup() {
   for (let i = 0; i < numSegments; i++) {
     xCor.push(xStart + i * diff);
     yCor.push(yStart);
-  }
+  } 
 }
 
 function draw() {
   background(0);
+
   stroke("lightgreen");
-  for (let i = 0; i < numSegments - 1; i++) {
+    
+  for (let i = 0; i < numSegments - 2; i++) {
     line(xCor[i], yCor[i], xCor[i + 1], yCor[i + 1]);
   }
-  updateSnakeCoordinates();
-  checkGameStatus();
-  checkForFruit();
+
+  
+
+  stroke("red");
+  point(xFruit, yFruit);
+
+  if (running) {    
+    updateSnakeCoordinates();
+    checkGameStatus();
+    checkForFruit();
+    frameRate(frames);
+  } 
 }
 
 /*
@@ -82,6 +97,7 @@ function updateSnakeCoordinates() {
  or if the snake hits itself.
 */
 function checkGameStatus() {
+  if (!running) return;
   if (
     xCor[xCor.length - 1] > width ||
     xCor[xCor.length - 1]< 0 ||
@@ -89,9 +105,11 @@ function checkGameStatus() {
     yCor[yCor.length - 1] < 0 ||
     checkSnakeCollision()
   ) {
-    noLoop();
+    running = false;
     scoreBoard.style.color = "red";
     scoreBoard.innerHTML = "Game over, your score is: " + score;
+    frameRate(20);
+    score = 0;
   }
 }
 
@@ -100,6 +118,7 @@ function checkGameStatus() {
  has to be the same as one of its own segment's (x,y) coordinate.
 */
 function checkSnakeCollision() {
+  if (!running) return;
   const snakeHeadX = xCor[xCor.length - 1];
   const snakeHeadY = yCor[yCor.length - 1];
   for (let i = 0; i < xCor.length - 1; i++) {
@@ -115,13 +134,12 @@ function checkSnakeCollision() {
  I add the last segment again at the tail, thereby extending the tail)
 */
 function checkForFruit() {
-    stroke("red");
-    point(xFruit, yFruit);
     if (dist(xCor[xCor.length - 1], yCor[yCor.length - 1], xFruit, yFruit) <= diff) {
         scoreBoard.innerHTML = "Score: " + (++score);
         xCor.unshift(xCor[0]);
         yCor.unshift(yCor[0]);
         numSegments++;
+        frames += 5;
         updateFruitCoordinates();
     }
 }
@@ -139,25 +157,52 @@ function updateFruitCoordinates() {
 
 function keyPressed() {
   switch (keyCode) {
-    case 65:
+    case 37:
       if (direction !== 'right') {
         direction = 'left';
       }
       break;
-    case 68:
+    case 39:
       if (direction !== 'left') {
         direction = 'right';
       }
       break;
-    case 87:
+    case 38:
       if (direction !== 'down') {
         direction = 'up';
       }
       break;
-    case 83:
+    case 40:
       if (direction !== 'up') {
         direction = 'down';
       }
       break;
+    case 82:
+      xCor = [];
+      yCor = [];
+
+
+      numSegments = 10;
+
+      for (let i = 0; i < numSegments; i++) {
+        xCor.push(xStart + i * diff);
+        yCor.push(yStart);
+      } 
+
+      score = 0;
+      scoreBoard.style.color = "white";
+      scoreBoard.innerHTML = "Score: " + score;
+      running = true;
+      frames = 20;
+      
+      frameRate(20);
+      updateFruitCoordinates();
+      break;
   }
 }
+
+window.addEventListener("keydown", function(e) {
+  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+      e.preventDefault();
+  }
+}, false);
