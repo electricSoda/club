@@ -18,7 +18,7 @@ let score = 0;
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
-  frameRate(50);
+  frameRate(35);
   stroke(255);
   strokeWeight(20);
   updateFruitCoordinates();
